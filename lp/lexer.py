@@ -45,6 +45,8 @@ class Lexer:
       literal = self._read_number()
 
       return Token(TokenType.INT, literal)
+    elif match(r'^<$', self._character):
+      token = Token(TokenType.LT, self._character)
     else: 
       token =  Token(TokenType.ILLEGAL, self._character)
 
