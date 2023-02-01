@@ -83,11 +83,14 @@ class TexerTest(TestCase):
     self.assertEquals(tokens, expected_tokens)
     
   def test_assignment(self) -> None:
-    source: str = 'variable cinco = 5;'
+    source: str = '''
+      variable cinco = 5;
+      variable num_1 = 1;
+    '''
     lexer: Lexer = Lexer(source)
     
     tokens: List[Token] = []
-    for _ in range(5):
+    for _ in range(10):
       tokens.append(lexer.next_token())
       
     expected_tokens: List[Token] = [
@@ -95,6 +98,11 @@ class TexerTest(TestCase):
       Token(TokenType.IDENT, 'cinco'),
       Token(TokenType.ASSING, '='),
       Token(TokenType.INT, '5'),
+      Token(TokenType.SEMICOLON, ';'),
+      Token(TokenType.LET, 'variable'),
+      Token(TokenType.IDENT, 'num_1'),
+      Token(TokenType.ASSING, '='),
+      Token(TokenType.INT, '1'),
       Token(TokenType.SEMICOLON, ';'),
     ]
     
