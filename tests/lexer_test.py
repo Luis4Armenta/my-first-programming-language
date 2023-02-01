@@ -27,7 +27,7 @@ class TexerTest(TestCase):
     self.assertEquals(tokens, expected_tokens)
   
   def test_one_character_operator(self) -> None:
-    source: str = '=+'
+    source: str = '=+-*/<>!%'
     lexer: Lexer = Lexer(source)
     
     tokens: List[Token] = []
@@ -36,7 +36,14 @@ class TexerTest(TestCase):
       
     expected_tokens: List[Token] = [
       Token(TokenType.ASSING, '='),
-      Token(TokenType.PLUS, '+')
+      Token(TokenType.PLUS, '+'),
+      Token(TokenType.MINUS, '-'),
+      Token(TokenType.MULTIPLICATION, '*'),
+      Token(TokenType.DIVISION, '/'),
+      Token(TokenType.LT, '<'),
+      Token(TokenType.GT, '>'),
+      Token(TokenType.NEGATION, '!'),
+      Token(TokenType.MOD, '%'),
     ]
     
     self.assertEquals(tokens, expected_tokens)
