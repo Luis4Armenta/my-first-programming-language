@@ -191,3 +191,38 @@ class TexerTest(TestCase):
     ]
     
     self.assertEquals(tokens, expected_tokens)
+    
+  def test_two_character_operator(self) -> None:
+    source: str = '''
+      10 == 10;
+      10 != 9;
+      10 >= 10;
+      9 <= 10;
+    '''
+    lexer: Lexer = Lexer(source)
+    
+    tokens: List[Token] = []
+    for _ in range(16):
+      tokens.append(lexer.next_token())
+      
+    expected_tokens: List[Token] = [
+      Token(TokenType.INT, '10'),
+      Token(TokenType.EQ, '=='),
+      Token(TokenType.INT, '10'),
+      Token(TokenType.SEMICOLON, ';'),
+      Token(TokenType.INT, '10'),
+      Token(TokenType.NOT_EQ, '!='),
+      Token(TokenType.INT, '9'),
+      Token(TokenType.SEMICOLON, ';'),
+      Token(TokenType.INT, '10'),
+      Token(TokenType.G_OR_EQ, '>='),
+      Token(TokenType.INT, '10'),
+      Token(TokenType.SEMICOLON, ';'),
+      Token(TokenType.INT, '9'),
+      Token(TokenType.L_OR_EQ, '<='),
+      Token(TokenType.INT, '10'),
+      Token(TokenType.SEMICOLON, ';'),
+    ]
+
+    self.assertEquals(tokens, expected_tokens)
+    
