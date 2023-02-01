@@ -92,3 +92,36 @@ class TexerTest(TestCase):
     ]
     
     self.assertEquals(tokens, expected_tokens)
+    
+  def test_function_declaration(self) -> None:
+    source: str = '''
+      variable suma = procedimiento(x, y) {
+        x + y;
+      };
+    '''
+    lexer: Lexer = Lexer(source)
+    
+    tokens: List[Token] = []
+    for _ in range(16):
+      tokens.append(lexer.next_token())
+
+    expected_tokens: List[Token] = [
+      Token(TokenType.LET, 'variable'),
+      Token(TokenType.IDENT, 'suma'),
+      Token(TokenType.ASSING, '='),
+      Token(TokenType.FUNCTION, 'procedimiento'),
+      Token(TokenType.LPAREN, '('),
+      Token(TokenType.IDENT, 'x'),
+      Token(TokenType.COMMA, ','),
+      Token(TokenType.IDENT, 'y'),
+      Token(TokenType.RPAREN, ')'),
+      Token(TokenType.LBRACE, '{'),
+      Token(TokenType.IDENT, 'x'),
+      Token(TokenType.PLUS, '+'),
+      Token(TokenType.IDENT, 'y'),
+      Token(TokenType.SEMICOLON, ';'),
+      Token(TokenType.RBRACE, '}'),
+      Token(TokenType.SEMICOLON, ';'),
+    ]
+    
+    self.assertEquals(tokens, expected_tokens)
