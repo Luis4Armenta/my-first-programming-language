@@ -51,9 +51,7 @@ class ParserTest(TestCase):
       self.assertIsInstance(statement, LetStatement)
       identifiers.append(str(statement).split(' ')[1])
     
-    expected_identifiers: List[str] = [
-      'x', 'y', 'foo'
-    ]
+    expected_identifiers: List[str] = [ 'x', 'y', 'foo' ]
     
     self.assertEquals(identifiers, expected_identifiers)
   
@@ -74,4 +72,11 @@ class ParserTest(TestCase):
     expected_names: List[str] = ['x', 'y', 'foo']
     self.assertEquals(names, expected_names)
 
+  def test_parse_errors(self) -> None:
+    source: str = 'variable x 5;'
+    lexer: Lexer = Lexer(source)
+    parser: Parser = Parser(lexer)
 
+    program: Program = parser.parse_program()
+    
+    self.assertEquals(len(parser.errors), 1)
