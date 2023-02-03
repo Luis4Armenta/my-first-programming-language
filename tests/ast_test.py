@@ -2,7 +2,9 @@ from unittest import TestCase
 from lp.ast import(
   Identifier,
   LetStatement,
-  Program
+  ReturnStatement,
+  Program,
+  Expression
 )
 from lp.token import Token, TokenType
 
@@ -23,5 +25,18 @@ class ASTTest(TestCase):
 
     self.assertEquals(program_str, 'variable mi_var = otra_var;')
     
+  def test_return_statement(self) -> None:
+    # regresa x;
+    
+    program: Program = Program(statements=[
+      ReturnStatement(
+        token=Token(TokenType.RETURN, 'regresa'),
+        return_value = Expression(Token(TokenType.IDENT, 'x'))
+      )
+    ])
+    
+    program_str = str(program)
+
+    self.assertEquals(program_str, 'regresa x;')
   
     

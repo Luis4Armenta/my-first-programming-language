@@ -26,6 +26,9 @@ class Expression(ASTNode):
     
   def token_literal(self) -> str:
     return self.token.literal
+  
+  def __str__(self) -> str:
+    return f'{self.token_literal()}'
 
 class Program(ASTNode):
   def __init__(self, statements: List[Statement]) -> None:
