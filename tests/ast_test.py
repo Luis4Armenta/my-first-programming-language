@@ -4,7 +4,9 @@ from lp.ast import(
   LetStatement,
   ReturnStatement,
   Program,
-  Expression
+  Expression,
+  ExpressionStatement,
+  Integer
 )
 from lp.token import Token, TokenType
 
@@ -39,4 +41,16 @@ class ASTTest(TestCase):
 
     self.assertEquals(program_str, 'regresa x;')
   
+  def test_identifier_expression(self) -> None:
+    # variable total = 5;
     
+    program: Program = Program(statements=[
+      LetStatement(
+        token=Token(TokenType.LET, 'variable'),
+        name=Identifier(Token(TokenType.IDENT, 'total'), 'total'),
+        value=Integer(Token(TokenType.INT, '5'), value=5)
+      )
+    ])
+    
+    program_str = str(program)
+    self.assertEquals(program_str, 'variable total = 5;')
