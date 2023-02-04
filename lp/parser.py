@@ -1,8 +1,31 @@
-from typing import Optional, List
+from enum import IntEnum
+from typing import Optional, List, Callable, Dict
 
 from lp.lexer import Lexer
-from lp.ast import Program, Statement, LetStatement, Identifier, ReturnStatement
+from lp.ast import (
+  Program,
+  Statement,
+  LetStatement,
+  Identifier, 
+  ReturnStatement,
+  Expression,
+  ExpressionStatement
+)
 from lp.token import Token, TokenType
+
+PrefixParsFn = Callable[[], Optional[Expression]]
+InfixParsFn = Callable[[Expression], Optional[Expression]]
+PrefixParsFns = Dict[TokenType, PrefixParsFn]
+InfixParsFns = Dict[TokenType, InfixParsFn]
+
+class Precedence(IntEnum):
+  LOWEST = 1
+  EQUALS = 2
+  LESSGRATER = 3
+  SUM = 4
+  PRODUCT = 5
+  PREFIX = 6
+  CALL = 7
 
 class Parser:
   
@@ -12,6 +35,8 @@ class Parser:
     self._peek_token: Optional[Token] = None
     self._errors: List[str] = []
     
+    self._prefix_parse_fns: PrefixParsFns = self._register_prefix_fns()
+    self._infix_parse_fns: InfixParsFns = self._register_infix_fns()
     self._advance_tokens()
     self._advance_tokens()
     
@@ -53,6 +78,34 @@ class Parser:
 
     self._errors.append(error)
     
+  def _parse_expression(self, precedece: Precedence)  -> Optional[Expression]:
+    assert self._current_token is not None
+    try:
+      prefix_parse_fn = self._prefix_parse_fns[self._current_token.token_type]
+    except KeyError:
+      return None
+    
+    left_expression = prefix_parse_fn()
+    
+    return left_expression
+    
+  def _parse_expression_statement(self) -> Optional[ExpressionStatement]:
+    assert self._current_token is not None
+    expression_statement = ExpressionStatement(self._current_token)
+    
+    expression_statement.expression = self._parse_expression(Precedence.LOWEST)
+    
+    assert self._peek_token is not None
+    if self._peek_token.token_type == TokenType.SEMICOLON:
+      self._advance_tokens()
+      
+    return expression_statement
+  
+  def _parse_identifier(self) -> Identifier:
+    assert self._current_token is not None
+    
+    return Identifier(self._current_token, value=self._current_token.literal)
+    
   def _parse_let_statement(self) -> Optional[LetStatement]:
     assert self._current_token is not None
     let_statment: LetStatement = LetStatement(token=self._current_token)
@@ -60,8 +113,8 @@ class Parser:
     if not self._expected_token(TokenType.IDENT):
       return None
     
-    let_statment.name = Identifier(token=self._current_token, value=self._current_token.literal)
-
+    let_statment.name = self._parse_identifier()
+    
     if not self._expected_token(TokenType.ASSING):
       return None
     
@@ -94,4 +147,12 @@ class Parser:
     elif self._current_token.token_type == TokenType.RETURN:
       return self._parse_return_statement()
     else:
-      return None
+      return self._parse_expression_statement()
+  
+  def _register_infix_fns(self) -> InfixParsFns:
+    return {}
+  
+  def _register_prefix_fns(self) -> PrefixParsFns:
+    return {
+      TokenType.IDENT: self._parse_identifier
+    }
