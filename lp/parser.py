@@ -12,7 +12,8 @@ from lp.ast import (
   ExpressionStatement,
   Integer,
   Prefix,
-  Infix
+  Infix,
+  Boolean
 )
 from lp.token import Token, TokenType
 
@@ -177,6 +178,11 @@ class Parser:
     
     return integer
     
+  def _parse_boolean(self) -> Boolean:
+    assert self._current_token is not None
+    
+    return Boolean(self._current_token, self._current_token.token_type == TokenType.TRUE)
+    
   def _parse_let_statement(self) -> Optional[LetStatement]:
     assert self._current_token is not None
     let_statment: LetStatement = LetStatement(token=self._current_token)
@@ -255,9 +261,11 @@ class Parser:
   
   def _register_prefix_fns(self) -> PrefixParsFns:
     return {
+      TokenType.FALSE: self._parse_boolean,
       TokenType.IDENT: self._parse_identifier,
       TokenType.INT: self._parse_integer,
       TokenType.MINUS: self._parse_prefix_expression,
       TokenType.NEGATION: self._parse_prefix_expression,
+      TokenType.TRUE: self._parse_boolean,
     }
     
