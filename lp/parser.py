@@ -36,8 +36,9 @@ PRECEDENCEES: Dict[TokenType, Precedence] = {
   TokenType.NOT_EQ: Precedence.EQUALS,
   TokenType.LT: Precedence.LESSGRATER,
   TokenType.GT: Precedence.LESSGRATER,
+  TokenType.L_OR_EQ: Precedence.LESSGRATER,
+  TokenType.G_OR_EQ: Precedence.LESSGRATER,
   TokenType.PLUS: Precedence.SUM,
-  TokenType.MINUS: Precedence.SUM,
   TokenType.MINUS: Precedence.SUM,
   TokenType.MULTIPLICATION: Precedence.PRODUCT,
   TokenType.DIVISION: Precedence.PRODUCT,
@@ -256,6 +257,8 @@ class Parser:
       TokenType.EQ: self._parse_infix_expression,
       TokenType.NOT_EQ: self._parse_infix_expression,
       TokenType.LT: self._parse_infix_expression,
+      TokenType.L_OR_EQ: self._parse_infix_expression,
+      TokenType.G_OR_EQ: self._parse_infix_expression,
       TokenType.GT: self._parse_infix_expression,
     }
   

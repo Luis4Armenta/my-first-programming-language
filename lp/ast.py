@@ -43,8 +43,10 @@ class Program(ASTNode):
   def __str__(self) -> str:
     out: List[str] = []
     
+    # out.append('(')
     for statement in self.statements:
       out.append(str(statement))
+    # out.append(')')
       
     return ''.join(out)
   
@@ -142,7 +144,7 @@ class Infix(Expression):
     self.right = right
     
   def __str__(self) -> str:
-    return f'{str(self.left)} {self.operator} {str(self.right)}'
+    return f'({str(self.left)} {self.operator} {str(self.right)})'
 
 class Boolean(Expression):
   
