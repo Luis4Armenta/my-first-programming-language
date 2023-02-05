@@ -1,7 +1,12 @@
 from typing import cast, List, Optional
 
 import lp.ast as ast
-from lp.object import Integer, Object
+from lp.object import Integer, Object, Boolean, Null
+
+
+TRUE = Boolean(True)
+FALSE = Boolean(False)
+NULL = Null()
 
 
 def evaluate(node: ast.ASTNode) -> Optional[Object]:
@@ -21,6 +26,11 @@ def evaluate(node: ast.ASTNode) -> Optional[Object]:
     
     assert node.value is not None
     return Integer(node.value)
+  elif node_type == ast.Boolean:
+    node = cast(ast.Boolean, node)
+    
+    assert node.value is not None
+    return _to_boolean_object(node.value)
   
   return None
   
@@ -31,3 +41,6 @@ def _evaluate_statements(statements: List[ast.Statement]) -> Optional[Object]:
     result = evaluate(statement)
   
   return result
+
+def _to_boolean_object(value: bool) -> Boolean:
+  return TRUE if value else FALSE
