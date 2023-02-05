@@ -15,7 +15,8 @@ from lp.ast import (
   Infix,
   Boolean,
   Block,
-  If
+  If,
+  Function
 )
 from lp.token import Token, TokenType
 
@@ -291,6 +292,56 @@ class Parser:
 
     return if_expression
     
+  def _parse_function(self) -> Optional[Function]:
+    assert self._current_token is not None
+    function = Function(self._current_token)
+    
+    if not self._expected_token(TokenType.LPAREN):
+      return None
+    
+    function.parameters = self._parse_function_parameters()
+    
+    if not self._expected_token(TokenType.LBRACE):
+      return None
+    
+    function.body = self._parse_block()
+    
+    return function
+  
+  def _parse_function_parameters(self) -> List[Identifier]:
+    params: List[Identifier] = []
+    
+    assert self._peek_token is not None
+    if self._peek_token.token_type == TokenType.RPAREN:
+      self._advance_tokens()
+      
+      return params
+    
+    self._advance_tokens()
+
+    assert self._current_token is not None
+    param = Identifier(
+      token=self._current_token,
+      value=self._current_token.literal
+    )
+    
+    params.append(param)
+    
+    while self._peek_token.token_type == TokenType.COMMA:
+      self._advance_tokens()
+      self._advance_tokens()
+      
+      param = Identifier(
+        token=self._current_token,
+        value=self._current_token.literal
+      )
+      
+      params.append(param)
+
+    if not self._expected_token(TokenType.RPAREN):
+      return []
+    
+    return params
   
   def _parse_statement(self) -> Optional[Statement]:
     assert self._current_token is not None
@@ -332,6 +383,7 @@ class Parser:
       TokenType.NEGATION: self._parse_prefix_expression,
       TokenType.TRUE: self._parse_boolean,
       TokenType.LPAREN: self._parse_grouped_expression,
-      TokenType.IF: self._parse_if
+      TokenType.IF: self._parse_if,
+      TokenType.FUNCTION: self._parse_function
     }
     
