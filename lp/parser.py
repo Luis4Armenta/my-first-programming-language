@@ -184,6 +184,16 @@ class Parser:
     
     return Boolean(self._current_token, self._current_token.token_type == TokenType.TRUE)
     
+  def _parse_grouped_expression(self) -> Optional[Expression]:
+    self._advance_tokens()
+    
+    expression = self._parse_expression(Precedence.LOWEST)
+    
+    if not self._expected_token(TokenType.RPAREN):
+      return None
+    
+    return expression
+    
   def _parse_let_statement(self) -> Optional[LetStatement]:
     assert self._current_token is not None
     let_statment: LetStatement = LetStatement(token=self._current_token)
@@ -270,5 +280,6 @@ class Parser:
       TokenType.MINUS: self._parse_prefix_expression,
       TokenType.NEGATION: self._parse_prefix_expression,
       TokenType.TRUE: self._parse_boolean,
+      TokenType.LPAREN: self._parse_groupd_expression
     }
     
