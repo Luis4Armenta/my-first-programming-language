@@ -16,7 +16,8 @@ from lp.ast import (
   Boolean,
   Block,
   If,
-  Function
+  Function,
+  Call
 )
 from lp.token import Token, TokenType
 
@@ -46,6 +47,7 @@ PRECEDENCEES: Dict[TokenType, Precedence] = {
   TokenType.MULTIPLICATION: Precedence.PRODUCT,
   TokenType.DIVISION: Precedence.PRODUCT,
   TokenType.MOD: Precedence.PRODUCT,
+  TokenType.LPAREN: Precedence.CALL
 }
 
 class Parser:
@@ -186,6 +188,43 @@ class Parser:
     assert self._current_token is not None
     
     return Boolean(self._current_token, self._current_token.token_type == TokenType.TRUE)
+    
+  def _parse_call(self, function: Expression) -> Call:
+    assert self._current_token is not None
+    
+    call = Call(
+      token=self._current_token,
+      function=function
+    )
+    call.arguments = self._parse_call_arguments()
+    
+    return call
+  
+  def _parse_call_arguments(self) -> Optional[List[Expression]]:
+    arguments: List[Expression] = []
+    
+    assert self._peek_token is not None
+    if self._peek_token.token_type == TokenType.RPAREN:
+      self._advance_tokens()
+      
+      return arguments
+    
+    self._advance_tokens()
+    
+    if expression := self._parse_expression(Precedence.LOWEST):
+      arguments.append(expression)
+      
+    while self._peek_token.token_type == TokenType.COMMA:
+      self._advance_tokens()
+      self._advance_tokens()
+      
+      if expression := self._parse_expression(Precedence.LOWEST):
+        arguments.append(expression)
+        
+    if not self._expected_token(TokenType.RPAREN):
+      return None
+    
+    return arguments
     
   def _parse_block(self) -> Block:
     assert self._current_token is not None
@@ -372,6 +411,7 @@ class Parser:
       TokenType.L_OR_EQ: self._parse_infix_expression,
       TokenType.G_OR_EQ: self._parse_infix_expression,
       TokenType.GT: self._parse_infix_expression,
+      TokenType.LPAREN: self._parse_call,
     }
   
   def _register_prefix_fns(self) -> PrefixParsFns:
