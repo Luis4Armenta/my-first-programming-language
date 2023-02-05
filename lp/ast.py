@@ -213,7 +213,7 @@ class Function(Expression):
     
     params: str = ', '.join(param_list)
     
-    return f'{self.token_literal()}(params) {str(self.body)}'
+    return f'{self.token_literal()}({params}) {str(self.body)}'
 
 class Call(Expression):
   
