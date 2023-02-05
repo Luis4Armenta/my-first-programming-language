@@ -268,10 +268,12 @@ class Parser:
     if not self._expected_token(TokenType.ASSING):
       return None
     
-    # TODO
-    # Terinar cuando sepamos parsear expresiones
+    self._advance_tokens()
     
-    while self._current_token.token_type != TokenType.SEMICOLON:
+    let_statment.value = self._parse_expression(Precedence.LOWEST)
+    
+    assert self._peek_token is not None
+    if self._peek_token.token_type == TokenType.SEMICOLON:
       self._advance_tokens()
       
     return let_statment
@@ -295,9 +297,10 @@ class Parser:
     
     self._advance_tokens()
     
-    #TODO: Terminar cuando sepamos parsear expresiones
+    return_statement.return_value = self._parse_expression(Precedence.LOWEST)
     
-    while self._current_token.token_type != TokenType.SEMICOLON:
+    assert self._peek_token is not None
+    if self._peek_token.token_type == TokenType.SEMICOLON:
       self._advance_tokens()
       
     return return_statement
