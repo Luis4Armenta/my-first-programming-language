@@ -280,6 +280,6 @@ class Parser:
       TokenType.MINUS: self._parse_prefix_expression,
       TokenType.NEGATION: self._parse_prefix_expression,
       TokenType.TRUE: self._parse_boolean,
-      TokenType.LPAREN: self._parse_groupd_expression
+      TokenType.LPAREN: self._parse_grouped_expression
     }
     
