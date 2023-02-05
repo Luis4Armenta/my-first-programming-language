@@ -13,7 +13,9 @@ from lp.ast import (
   Integer,
   Prefix,
   Infix,
-  Boolean
+  Boolean,
+  Block,
+  If
 )
 from lp.token import Token, TokenType
 
@@ -184,6 +186,26 @@ class Parser:
     
     return Boolean(self._current_token, self._current_token.token_type == TokenType.TRUE)
     
+  def _parse_block(self) -> Block:
+    assert self._current_token is not None
+    block_statement = Block(
+      token=self._current_token,
+      statements=[]
+    )
+    
+    self._advance_tokens()
+    
+    while not self._current_token.token_type == TokenType.RBRACE \
+      and not self._current_token.token_type == TokenType.EOF:
+        statement = self._parse_statement()
+        
+        if statement:
+          block_statement.statements.append(statement)
+
+        self._advance_tokens()
+        
+    return block_statement
+    
   def _parse_grouped_expression(self) -> Optional[Expression]:
     self._advance_tokens()
     
@@ -240,6 +262,27 @@ class Parser:
       
     return return_statement
   
+  def _parse_if(self) -> Optional[If]:
+    assert self._current_token is not None
+    if_expression = If(token=self._current_token)
+    
+    if not self._expected_token(TokenType.LPAREN):
+      return None
+    
+    self._advance_tokens()
+    
+    if_expression.condition = self._parse_expression(Precedence.LOWEST)
+
+    if not self._expected_token(TokenType.RPAREN):
+      return None
+    
+    if not self._expected_token(TokenType.LBRACE):
+      return None
+    
+    if_expression.consequence = self._parse_block()
+    
+    return if_expression
+    
   
   def _parse_statement(self) -> Optional[Statement]:
     assert self._current_token is not None
@@ -280,6 +323,7 @@ class Parser:
       TokenType.MINUS: self._parse_prefix_expression,
       TokenType.NEGATION: self._parse_prefix_expression,
       TokenType.TRUE: self._parse_boolean,
-      TokenType.LPAREN: self._parse_grouped_expression
+      TokenType.LPAREN: self._parse_grouped_expression,
+      TokenType.IF: self._parse_if
     }
     

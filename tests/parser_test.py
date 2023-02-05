@@ -14,7 +14,9 @@ from lp.ast import (
   Integer,
   Prefix,
   Infix,
-  Boolean
+  Boolean,
+  If,
+  Block
 )
 from lp.token import Token, TokenType
 
@@ -323,6 +325,36 @@ class ParserTest(TestCase):
       
       self._test_program_statement(parser, program, expected_statement_count)
       self.assertEquals(str(program), expected_result)
+    
+  def test_if_expression(self) -> None:
+    source: str = 'si (x < y) { z }'
+    lexer: Lexer = Lexer(source)
+    parser: Parser = Parser(lexer)
+    
+    program: Program = parser.parse_program()
+    
+    self._test_program_statement(parser, program)
+    
+    # Test correct node type
+    if_expression = cast(If, cast(ExpressionStatement, program.statements[0]).expression)
+    self.assertIsInstance(if_expression, If)
+    
+    # Test condition
+    assert if_expression.condition is not None
+    self._test_infix_expression(if_expression.condition, 'x', '<', 'y')
+    
+    # Test consequence
+    assert if_expression.consequence is not None
+    self.assertIsInstance(if_expression.consequence, Block)
+    self.assertEquals(len(if_expression.consequence.statements), 1)
+    
+    consequence_statement = cast(ExpressionStatement, if_expression.consequence.statements[0])
+
+    assert consequence_statement.expression is not None
+    self._test_identifier(consequence_statement.expression, 'z')
+    
+    # Test alternative
+    self.assertIsNone(if_expression.alternative)
     
   def _test_infix_expression(
     self,
