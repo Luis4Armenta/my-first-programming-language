@@ -3,6 +3,7 @@ from typing import List
 from os import system, name
 
 from lp.ast import Program
+from lp.evaluator import evaluate
 from lp.lexer import Lexer
 from lp.parser import Parser
 from lp.token import Token, TokenType
@@ -33,4 +34,7 @@ def start_repl() -> None:
         _print_parse_errors(parser.errors)
         continue
 
-      print(program)
+      evaluated = evaluate(program)
+      
+      if evaluated is not None:
+        print(evaluated.inspect())
