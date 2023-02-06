@@ -10,7 +10,14 @@ from unittest import TestCase
 from lp.ast import Program
 from lp.evaluator import evaluate, NULL
 from lp.lexer import Lexer
-from lp.object import Integer, Object, Boolean, Error, Environment
+from lp.object import (
+  Integer,
+  Object,
+  Boolean,
+  Error,
+  Environment,
+  Function
+)
 from lp.parser import Parser
 
 class EvaluatorTest(TestCase):
@@ -163,8 +170,49 @@ class EvaluatorTest(TestCase):
       evaluated = self._evaluate_tests(source)
       self._test_integer_object(evaluated, expected)
   
+  def test_function_evaluation(self) -> None:
+    source: str = 'procedimiento(x) { x + 2;};'
+    
+    evaluated = self._evaluate_tests(source)
+    
+    self.assertIsInstance(evaluated, Function)
+    
+    evaluated = cast(Function, evaluated)
+    self.assertEquals(len(evaluated.parameters), 1)
+    self.assertEquals(str(evaluated.parameters[0]), 'x')
+    self.assertEquals(str(evaluated.body), '(x + 2)')
+  
+
+  def test_function_calls(self) -> None:
+    tests: List[Tuple[str, int]] = [
+      ('variable identidad = procedimiento(x) { x }; identidad(5);', 5),
+      ('''
+        variable identidad = procedimiento(x) {
+          regresa x;
+        };
+        identidad(5);
+      ''', 5),
+      ('''
+        variable doble = procedimiento(x) {
+          regresa 2 * x;
+        };
+        doble(5);
+      ''', 10),
+      ('''
+        variable suma = procedimiento(x, y) {
+          regresa x + y;
+        };
+        suma(5 + 5, suma(10, 10));
+      ''', 30),
+      ('procedimiento(x) { x }(5);', 5),
+    ]
+    
+    for source, expected in tests:
+      evaluated = self._evaluate_tests(source)
+      self._test_integer_object(evaluated, expected)
+
   def _test_null_object(self, evaluated: Object) -> None:
-    self.assertEquals(evaluated, NULL)
+    self.assertEquals(evaluated, NULL)  
       
   def _evaluate_tests(self, source: str) -> Object:
     lexer: Lexer = Lexer(source)
