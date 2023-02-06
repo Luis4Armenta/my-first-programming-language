@@ -1,13 +1,14 @@
 from typing import (
   cast,
   List,
-  Tuple
+  Tuple,
+  Any
 )
 
 from unittest import TestCase
 
 from lp.ast import Program
-from lp.evaluator import evaluate
+from lp.evaluator import evaluate, NULL
 from lp.lexer import Lexer
 from lp.object import Integer, Object, Boolean
 from lp.parser import Parser
@@ -70,6 +71,28 @@ class EvaluatorTest(TestCase):
     for source, expected in tests:
       evaluated = self._evaluate_tests(source)
       self._test_boolean_object(evaluated, expected)
+      
+  def test_if_else_evaluation(self) -> None:
+    tests: List[Tuple[str, Any]] = [
+      ('si (verdadero) { 10 }', 10),
+      ('si (falso) { 10 }', None),
+      ('si (1) { 10 }', 10),
+      ('si (1 < 2) { 10 }', 10),
+      ('si (1 > 2) { 10 }', None),
+      ('si (1 < 2) { 10 } si_no { 20 }', 10),
+      ('si (1 > 2) { 10 } si_no { 20 }', 20),
+    ]
+    
+    for source, expected in tests:
+      evaluated = self._evaluate_tests(source)
+      
+      if type(expected) == int:
+        self._test_integer_object(evaluated, expected)
+      else:
+        self._test_null_object(evaluated)
+        
+  def _test_null_object(self, evaluated: Object) -> None:
+    self.assertEquals(evaluated, NULL)
       
   def _evaluate_tests(self, source: str) -> Object:
     lexer: Lexer = Lexer(source)
