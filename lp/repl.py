@@ -22,11 +22,14 @@ def _print_parse_errors(errors: List[str]) -> None:
     print(error)
 
 def start_repl() -> None:
+  scanned: List[str] = []
+  
   while (source := input('>> ')) != 'salir()':
     if source == 'limpiar()':
       _clear_screen()
     else:
-      lexer: Lexer = Lexer(source)
+      scanned.append(source)
+      lexer: Lexer = Lexer(' '.join(scanned))
       parser: Parser = Parser(lexer)
       
       program: Program = parser.parse_program()
