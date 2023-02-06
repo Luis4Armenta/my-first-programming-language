@@ -10,7 +10,7 @@ from unittest import TestCase
 from lp.ast import Program
 from lp.evaluator import evaluate, NULL
 from lp.lexer import Lexer
-from lp.object import Integer, Object, Boolean
+from lp.object import Integer, Object, Boolean, Error
 from lp.parser import Parser
 
 class EvaluatorTest(TestCase):
@@ -112,6 +112,43 @@ class EvaluatorTest(TestCase):
     for source, expected in tests:
       evaluated = self._evaluate_tests(source)
       self._test_integer_object(evaluated, expected)
+      
+  def test_error_handling(self) -> None:
+    tests: List[Tuple[str, str,]] = [
+      ('5 + verdadero;', 'Discrepancia de tipos: INTEGER + BOOLEAN'),
+      ('5 + verdadero; 9;', 'Discrepancia de tipos: INTEGER + BOOLEAN'),
+      ('-verdadero;', 'Operador desconocido: - BOOLEAN'),
+      ('verdadero + falso;', 'Operador desconocido: BOOLEAN + BOOLEAN'),
+      ('5; verdadero - falso;', 'Operador desconocido: BOOLEAN - BOOLEAN'),
+      ('''
+        si (10 > 7) {
+          regresa verdadero + falso;
+        }
+       ''', 'Operador desconocido: BOOLEAN + BOOLEAN'),
+      ('''
+        si (10 > 7) {
+          si (verdadero) {
+            regresa verdadero * falso;
+          }
+          regresa 1;
+        }
+       ''', 'Operador desconocido: BOOLEAN * BOOLEAN'),
+      ('''
+        si (10 < 2) {
+          regresa 1;
+        } si_no {
+          regresa verdadero / falso;
+        }
+       ''', 'Operador desconocido: BOOLEAN / BOOLEAN'),
+    ]
+    
+    for source, expected in tests:
+      evaluated = self._evaluate_tests(source)
+      
+      self.assertIsInstance(evaluated, Error)
+      
+      evaluated = cast(Error, evaluated)
+      self.assertEquals(evaluated.message, expected)
         
   def _test_null_object(self, evaluated: Object) -> None:
     self.assertEquals(evaluated, NULL)
