@@ -53,6 +53,10 @@ class Lexer:
         token = self._make_two_character_token(TokenType.L_OR_EQ)
       else:
         token = Token(TokenType.LT, self._character)
+    elif match(r'^"$', self._character):
+      literal = self._read_string()
+      
+      return Token(TokenType.STRING, literal)
     elif match(r'^-$', self._character):
       token = Token(TokenType.MINUS, self._character)
     elif match(r'^\*$', self._character):
@@ -122,6 +126,20 @@ class Lexer:
       self._read_character()
       
     return self._source[initial_position : self._position]
+  
+  def _read_string(self) -> str:
+    self._read_character()
+    
+    initial_position = self._position
+    
+    while self._character != '"' and self._read_position <= len(self._source):
+      self._read_character()
+      
+    string = self._source[initial_position : self._position]
+
+    self._read_character()
+
+    return string
   
   def _skip_whitespace(self) -> None:
     while match(r'^\s$', self._character):

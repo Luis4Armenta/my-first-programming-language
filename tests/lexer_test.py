@@ -234,3 +234,23 @@ class TexerTest(TestCase):
 
     self.assertEquals(tokens, expected_tokens)
     
+  def test_string(self) -> None:
+    source: str = '''
+      "foo";
+      "No me esperaba encontrar este proyecto en platzi";
+    '''
+    
+    lexer: Lexer = Lexer(source)
+    
+    tokens: List[Token] = []
+    for i in range(4):
+      tokens.append(lexer.next_token())
+    
+    expected_token: List[Token] = [
+      Token(TokenType.STRING, 'foo'),
+      Token(TokenType.SEMICOLON, ';'),
+      Token(TokenType.STRING, 'No me esperaba encontrar este proyecto en platzi'),
+      Token(TokenType.SEMICOLON, ';'),
+    ]
+    
+    self.assertEquals(tokens, expected_token)

@@ -18,7 +18,8 @@ from lp.ast import (
   If,
   Block,
   Function,
-  Call
+  Call,
+  StringLiteral
 )
 from lp.token import Token, TokenType
 
@@ -504,6 +505,24 @@ class ParserTest(TestCase):
 
       for idx, param in enumerate(test['expected_params']):
         self._test_literal_expression(function.parameters[idx], param)
+    
+  def test_literal_expression(self) -> None:
+    source: str ='"Hello world!";'
+    lexer: Lexer = Lexer(source)
+    parser: Parser = Parser(lexer)
+    
+    program: Program = parser.parse_program()
+    
+    
+    expression_statement = cast(ExpressionStatement, program.statements[0])
+    assert type(expression_statement) == ExpressionStatement
+
+    print(type(expression_statement))
+
+    string_literal = cast(StringLiteral, expression_statement.expression)
+    
+    self.assertIsInstance(string_literal, StringLiteral)
+    self.assertEquals(string_literal.value, 'Hello world!')
     
   def _test_infix_expression(
     self,

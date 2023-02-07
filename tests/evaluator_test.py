@@ -16,7 +16,8 @@ from lp.object import (
   Boolean,
   Error,
   Environment,
-  Function
+  Function,
+  String
 )
 from lp.parser import Parser
 
@@ -210,6 +211,21 @@ class EvaluatorTest(TestCase):
     for source, expected in tests:
       evaluated = self._evaluate_tests(source)
       self._test_integer_object(evaluated, expected)
+      
+      
+  def test_string_evaluation(self) -> None:
+    tests: List[Tuple[str, str]] = [
+      ('"Hello world!";', 'Hello world!'),
+      ('procedimiento() {regresa "Platzi es genial";}();', 'Platzi es genial'),
+    ]
+    
+    for source, expected in tests:
+      evaluated = self._evaluate_tests(source)
+      self.assertIsInstance(evaluated, String)
+      
+      evaluated = cast(String, evaluated)
+      self.assertEquals(evaluated.value, expected)
+      
 
   def _test_null_object(self, evaluated: Object) -> None:
     self.assertEquals(evaluated, NULL)  

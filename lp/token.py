@@ -37,6 +37,7 @@ class TokenType(Enum):
   RETURN = auto()
   SEMICOLON = auto()
   TRUE = auto()
+  STRING = auto()
 
 class Token(NamedTuple):
   token_type: TokenType
