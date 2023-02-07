@@ -2,9 +2,11 @@ from abc import ABC, abstractmethod
 from enum import auto, Enum
 from typing import Dict, Any, List
 from lp.ast import Block, Identifier
+from typing_extensions import Protocol
 
 class ObjectType(Enum):
   BOOLEAN = auto()
+  BUILTIN = auto()
   INTEGER = auto()
   NULL = auto()
   RETURN = auto()
@@ -123,3 +125,18 @@ class String(Object):
   
   def inspect(self) -> str:
     return self.value
+  
+class BuiltinFunction(Protocol):
+
+  def __call__(self, *args: Object) -> Object: ...
+
+class Builtin(Object):
+  
+  def __init__(self, fn: BuiltinFunction):
+    self.fn = fn
+    
+  def type(self) -> ObjectType:
+    return ObjectType.BUILTIN
+  
+  def inspect(self) -> str:
+    return 'builtin function'
